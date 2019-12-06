@@ -59,7 +59,6 @@
                 
             });
 
-
             d3.json("usa-topo.json", function(error, usa) {
                 var geojson = topojson.feature(usa, usa.objects.tracts);
                 svg.selectAll("path")
