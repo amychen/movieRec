@@ -37,50 +37,40 @@
                 stroke-width: 3px;
             }
 
-            div.tooltip {		
-                position: absolute;			
-                text-align: center;			
-                width: 320px;					
-                height: 480px;					
-                padding: 2px;				
-                background: #f5eff7;	
-                border: 0px;		
-                border-radius: 8px;		
-                right: 40px;		
+            .svg-container {
+                text-align: center;
             }
-            
         </style>
         <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
         <script src="//d3js.org/topojson.v1.min.js"></script>
     </head>
     <body>
-        <div id="svg-container">MovieLens Reviewer Demographics</div>
+        <div class="svg-container">MovieLens Reviewer Demographics</div>
         <script>
-            var width = 1250, height = 550;
-            
-            var div = d3.select("body").append("div")	
-                        .attr("class", "tooltip")				
-                        .style("opacity", 0);
-
-            var svg = d3.select("body")
+            var height = 550;
+            var map = d3.select("body")
                         .append("svg")
-                        .attr("width", width)
+                        .attr("width", 900)
                         .attr("height", height);
 
-            var linear = d3.scale.linear().domain([0, 1100]).range([0, 1])
-            var computeColor = d3.interpolate("#ebaaff", "#7f00c9")
+            var details = d3.select("body")
+                            .append("svg")
+                            .attr("class", "a")
+                            .attr("width", 350)
+                            .attr("height", height);
 
-            var svgDefs = svg.append("defs");
+            var svgDefs = map.append("defs");
 
             var gradient = svgDefs.append("linearGradient").attr('id', 'mainGradient');
             gradient.append("stop").attr('class', 'stop-left').attr('offset', '0');
             gradient.append("stop").attr('class', 'stop-right').attr('offset', '1');
 
+            var linear = d3.scale.linear().domain([0, 1100]).range([0, 1])
+            var computeColor = d3.interpolate("#ebaaff", "#7f00c9")
+
             var path = d3.geo.path();
-            var pie = d3.layout.pie().value(function(d) {
-                        return d.g;
-                    })
-            var arc = d3.svg.arc().outerRadius(20).innerRadius(0);
+            var pie = d3.layout.pie().value(function(d) { return d.g; })
+            var arc = d3.svg.arc().outerRadius(50).innerRadius(10);
             
             var state_count = {};
             var state_gender_count = {};
@@ -105,7 +95,7 @@
 
                 d3.json("usa-topo.json", function(error, usa) {
                     var geojson = topojson.feature(usa, usa.objects.tracts);
-                    svg.selectAll("path")
+                    map.selectAll("path")
                         .data(geojson.features)
                         .enter().append("path")
                         .attr("class", function(d) {return "state " + d.properties.STUSPS})
@@ -114,53 +104,42 @@
                         })
                         .attr("d", path)
                         .on("mouseover", function(d) {
-                                var total = state_count[d.properties.STUSPS][1] + state_count[d.properties.STUSPS][2];
-                                // var g = svg.selectAll(".arc")
-                                //            .data(pie(state_gender_count[d.properties.STUSPS]))
-                                //            .enter().append("g")
-                                //            .attr("class", "arc")
-                                //            .attr("transform", "translate(" + d3.mouse(this)[0] + "," + d3.mouse(this)[1]+ ")");
-                                // g.append("path").attr("d", arc).style("fill", function(d) {return "#ffaab6"})
-                                div.transition().duration(200).style("opacity", 0.9);
-                                var g = div.selectAll(".arc")
-                                           .data(pie(state_gender_count[d.properties.STUSPS]))
-                                           .enter().append("g")
-                                           .attr("class", "arc")
-                                g.append("path").attr("d", arc).style("fill", function(d) {return "#ffaab6"})
-                                
+                            var g = details.selectAll(".arc")
+                                        .data(pie(state_gender_count[d.properties.STUSPS]))
+                                        .enter().append("g")
+                                        .attr("class", "arc")
+                                        .attr("transform", "translate(" + 250 + "," + 300 + ")");
+                            g.append("path").attr("d", arc).style("fill", function(d) {return "#ffaab6"})
                         })
                         .on("mouseout", function(d) {
                             d3.select(this).transition().attr('fill', function(d) {
                                 return computeColor(linear(state_count[d.properties.STUSPS]));
-                            })
-                            div.transition()		
-                               .duration(500)		
-                               .style("opacity", 0);	
+                            })	
                         })
                         .append("title").text(d => `${d.properties.NAME}, ${state_count[d.properties.STUSPS]} users`)
                 });
             });
 
-            svg.append('rect')
+            details.append('rect')
                 .classed('filled', true)
-                .attr('x', width - 200)
+                .attr('x', 140)
                 .attr('y', height - 45)
                 .attr('width', 180)
                 .attr('height', 20); 
 
-            svg.append('text')
-                .attr("x", width - 350)
+            details.append('text')
+                .attr("x", 2)
                 .attr("y", height - 30)
                 .text('Number of Users')
                 
-            svg.append('text')
-                .attr("x", width - 200)
-                .attr("y", height - 10)
+            details.append('text')
+                .attr("x", 140)
+                .attr("y", height)
                 .text("0")
             
-            svg.append('text')
-                .attr("x", width - 50)
-                .attr("y", height - 10)
+            details.append('text')
+                .attr("x", 288)
+                .attr("y", height)
                 .text("1099")
 
         </script>
