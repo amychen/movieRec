@@ -1,4 +1,6 @@
-import csv;
+import csv
+import json
+from collections import Counter
 
 def consolidateUsersByState(uF, rF): #{'state': ['1', '1241', '2', '322', ...]}
     userFile = csv.reader(open(uF), delimiter=",")
@@ -43,6 +45,10 @@ def consolidateStateMovieCount(userState, userMovies): #{'state': [{'name of mov
             currUserMovies = userMovies[user]
             for movie in currUserMovies:
                 stateMovieCount[state][movie] = 1
+                
+    with open("stateMoviesCount.json", "w") as outfile:
+        json.dump(stateMovieCount, outfile)
+
     return stateMovieCount
 
 

@@ -44,7 +44,7 @@ d3.csv("ml-1m/user_zip.csv", function(error, userData) {
             }
         }
     })
-
+    
     d3.json("usa-topo.json", function(error, usa) {
         var geojson = topojson.feature(usa, usa.objects.tracts);
         map.selectAll("path")
@@ -56,19 +56,78 @@ d3.csv("ml-1m/user_zip.csv", function(error, userData) {
             })
             .attr("d", path)
             .on("mouseover", function(d) {
-                details.selectAll(".arc").transition().duration(1000).style("opacity", 1);
+                d3.json("stateMoviesCount.json", function(error, data) {
+                    var moviesList = data[d.properties.STUSPS];
+                    var top5Movies = Object.keys(moviesList).map(function(key) {
+                        return { key: key, value: this[key] };
+                    }, moviesList);
+                    top5Movies.sort(function(p1, p2) { return p2.value - p1.value; });
+                    top5Movies = top5Movies.slice(0, 8)
+                    
+                    var x = d3.scale.linear()
+                        .range([0, 180])
+                        .domain([0, d3.max(top5Movies, function (dt) {
+                            return dt.value;
+                        })]);
+
+                    var y = d3.scale.ordinal()
+                        .rangeRoundBands([180, 0], .1)
+                        .domain(top5Movies.map(function (dt) {
+                            return dt.key;
+                        }).reverse());
+
+                    details.selectAll(".bar").remove();
+                    details.selectAll(".bar").transition().duration(1000).style("opacity", 1)
+                    details.selectAll(".label").remove();
+                    details.selectAll(".label").transition().duration(1000).style("opacity", 1)
+                    var bars = details.selectAll(".bar")
+                                        .data(top5Movies)
+                                        .enter()
+                                        .append("g")
+
+                    var topMovies = bars.append("rect")
+                                        .attr("class", "bar")
+                                        .attr("y", function(dt) {
+                                            return y(dt.key) + 100;
+                                        })
+                                        .attr("height", 15)
+                                        .attr("x", 10)
+                                        .attr("width", function(dt) {
+                                            return x(dt.value)
+                                        });
+
+                    bars.append("text")
+                        .attr("class", "label")
+                        .attr("y", function(dt) {
+                            return y(dt.key) + 110
+                        }).attr("x", function (dt) {
+                            return x(dt.value) + 20
+                        }).text(function (dt) {
+                            let lastIndex = dt.key.lastIndexOf(" ")
+                            return dt.key.substring(0, lastIndex) + " (" + dt.value + ")"
+                        });
+
+                    var xAxis = d3.svg.axis().scale(x).orient("top")
+                    var gx = details.append("g")
+                                .attr("class", "x axis")
+                                .call(xAxis)
+                })
+
                 details.selectAll(".arc").remove();
+                details.selectAll(".arc").transition().duration(1000).style("opacity", 1);
                 details.selectAll(".state-text").remove();
                 details.append("text")
                         .attr("class", "state-text")
-                        .attr("x", 15)
-                        .attr("y", 15)
+                        .attr("x", 10)
+                        .attr("y", 75)
                         .text(d.properties.NAME)
+
                 var g = details.selectAll(".arc")
                             .data(pie(state_gender_count[d.properties.STUSPS]))
                             .enter().append("g")
                             .attr("class", "arc")
-                            .attr("transform", "translate(" + 225 + "," + 300 + ")");
+                            .attr("transform", "translate(" + 100 + "," + 370 + ")");
+
                 g.append("path")
                     .attr("d", arc)
                     .style("stroke-width", "3px")
@@ -78,19 +137,53 @@ d3.csv("ml-1m/user_zip.csv", function(error, userData) {
 
                 g.append("text")
                     .attr("transform", function(d) { 
-                        return "translate(" + arc.centroid(d) +")"; 
+                        return "translate(" + arc.centroid(d) +")";
                     })
-                    .attr("text-anchor", "middle").text(function(a, i) {
+                    .attr("text-anchor", "middle")
+                    .text(function(a, i) {
                         return state_gender_count[d.properties.STUSPS][i].g
                     })
+
+                details.append("rect")
+                    .attr("class", "state-text")
+                    .attr('width', 35)
+                    .attr('height', 16)
+                    .attr('x', 200)
+                    .attr('y', 435)
+                    .attr('fill', '#aaf3ff')
+
+                details.append("text")
+                    .attr("class", "gender-text")
+                    .attr('x', 250)
+                    .attr('y', 450)
+                    .text('M')
+
+                details.append("rect")
+                    .attr("class", "state-text")
+                    .attr('width', 35)
+                    .attr('height', 16)
+                    .attr('x', 200)
+                    .attr('y', 455)
+                    .attr('fill', '#ffaab6')
+            
+                details.append("text")
+                    .attr("class", "gender-text")
+                    .attr('x', 250)
+                    .attr('y', 470)
+                    .text('F')
             })
             .on("mouseout", function(d) {
                 details.selectAll(".arc").transition().duration(500).style("opacity", 0);
                 details.selectAll(".state-text").transition().duration(500).style("opacity", 0);
+                details.selectAll(".gender-text").transition().duration(500).style("opacity", 0);
+                details.selectAll(".label").transition().duration(500).style("opacity", 0);
+                details.selectAll(".bar").transition().duration(500).style("opacity", 0);
             })
             .append("title").text(d => `${d.properties.NAME}, ${state_count[d.properties.STUSPS]} users`)
     });
 });
+
+
 
 details.append('rect')
     .classed('filled', true)
