@@ -1,70 +1,33 @@
 <!DOCTYPE html>
 <html>
   <head>
-<meta charset="utf-8">
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <div id="my_dataviz"></div>
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/LIB/d3.layout.cloud.js"></script>
+    <script>
+      var myWords = [
+        {word:"Action", size:"1828.0"},
+        {word: "Adventure", size: "1263.0"}, 
+        {word: "Animation", size: "611"}, {word: "Children", size: "664"}, 
+        {word: "Comedy", size: "3745"}, 
+        {word: "Crime", size: "1197"}, {word: "Documentary", size: "440"},{word:"Drama", size: "4356"},
+        {word:'Fantasy', size: "754"},
+        {word:'Horror', size: "974"},
+        {word:'Musical', size:"325"},
+        {word:'Mystery', size:"559"},
+        {word:'Romance', size: "1573"},
+        {word:'Sci-Fi',size: "953"},
+        {word:'Thriller', size:"1866"},
+        {word:'War', size:"379"},
+      ];
 
-<!-- Create a div where the graph will take place -->
-<style>
-        body {
-        background-color: lightgray;
-                 
-          }
-
-/*           #my_dataviz {
-            position: relative;
-            width: 1024px;
-            height: 1024px;
-            background: url('data:image/png;base64,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') no-repeat;
-            background-size: contain;
-            background-position: center center;
-          }
- */
-          svg {
-            position: absolute;
-            bottom: 350px;
-            left: 10%;
-            transform: translateX(-50%);
-          }
-           </style>
-</head>
-<body><div id="my_dataviz"></div>
-<!-- Load d3.js -->
-<script src="https://d3js.org/d3.v4.js"></script>
-
-<!-- Load d3-cloud -->
-<script src="https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/LIB/d3.layout.cloud.js"></script>
-
-
-<script>
-    
-    // List of words; divided the size by factor of 50 or else too large on page, removed genres where size less than 200 because unreadable
-    var myWords = [{word:"Action", size:"1828.0"},{word: "Adventure", size: "1263.0"}, {word: "Animation", size: "611"}, {word: "Children", size: "664"}, {word: "Comedy", size: "3745"}, 
-  {word: "Crime", size: "1197"}, {word: "Documentary", size: "440"},{word:"Drama", size: "4356"},
-  {word:'Fantasy', size: "754"},
-  //{word:'Film-Noir', size: "85"},
-  {word:'Horror', size: "974"},
-  //{word:'IMAX', size:"143"},
-  {word:'Musical', size:"325"},
-  {word:'Mystery', size:"559"},
-  {word:'Romance', size: "1573"},
-  {word:'Sci-Fi',size: "953"},
-  {word:'Thriller', size:"1866"},
-  {word:'War', size:"379"},
-  //{word:'Western', size:"163"} 
-  ];
-
-
-/*    var scale = d3.scaleLinear()
-             .domain([0, 4356])
-             .range([0, width]); */
-
-    
-    // set the dimensions and margins of the graph
     var margin = {top: 10, right: 20, bottom: 10, left: 50},
         width = 400 - margin.left - margin.right,
         height = 450 - margin.top - margin.bottom;
     
-    // append the svg object to the body of the page
     var svg = d3.select("#my_dataviz").append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
@@ -72,11 +35,9 @@
         .attr("transform",
               "translate(" + margin.left + "," + margin.top + ")");
     
-    // Constructs a new cloud layout instance. It run an algorithm to find the position of words that suits your requirements
     var layout = d3.layout.cloud()
       .size([width, height])
       .words(myWords.map(function(d) { 
-        console.log(parseFloat(d.size));
         return {text: d.word, size:d.size / 50}; }))
       .padding(15)        //space between words
       .rotate(function() { return ~~(Math.random() * 4) * 90; })
@@ -84,10 +45,8 @@
       .on("end", draw);
     layout.start();
     
-    // This function takes the output of 'layout' above and draw the words
     function draw(words) {
-      svg
-        .append("g")
+      svg.append("g")
           .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2+ ")")
           .selectAll("text")
             .data(words)
@@ -97,7 +56,6 @@
             .attr("text-anchor", "middle")
             .style("font-family", "Impact")
             .attr("transform", function(d) {
-              // console.log(d);
               return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
             })
             .text(function(d) { return d.text; });
