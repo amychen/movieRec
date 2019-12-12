@@ -3,8 +3,51 @@
     <head>
         <title>Movies Recommendation</title>
         <style>
+            .bar {
+                fill: #fc8c46;
+            }
+
+            .filled {
+                fill: url(#mainGradient);
+                stroke: url(#mainGradient);
+                stroke-width: 3px;
+            }
+
+            path {
+                stroke: #fff;
+                stroke-width: 0.3px;
+            }
+
+            path:hover {
+                stroke: #eaeaea;
+                stroke-width: 2px;
+            }
+            .stop-left {
+                stop-color: #ebaaff; 
+            }
+
+            .stop-right {
+                stop-color: #7f00c9; 
+            }
+
+            .state-text {
+                text-align: center;
+                font-size: 20px;
+            }
+
+            .svg-container {
+                font-size: 25px;
+                text-align: center;
+            }
+
+            text {
+                font-family: Verdana, Tahoma, sans-serif; 
+                font-size: 15px;
+            }
+
         </style>
         <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<<<<<<< HEAD
         <script src="https://cdn.anychart.com/releases/v8/js/anychart-base.min.js"></script>
         <script src="https://cdn.anychart.com/releases/v8/js/anychart-tag-cloud.min.js"></script>
     </head>
@@ -42,5 +85,12 @@
         </script>
 
 
+=======
+        <script src="//d3js.org/topojson.v1.min.js"></script>
+    </head>
+    <body>
+        <div class="svg-container">MovieLens Reviewer Demographics By State</div>
+        <script src="userDemographics.js"></script>
+>>>>>>> a22e7cb441fd421668d5ce65cae12109d76209b6
     </body>
 </html>
